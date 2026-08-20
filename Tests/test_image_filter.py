@@ -4,7 +4,7 @@ import pytest
 
 from PIL import Image, ImageFilter
 
-from .helper import assert_image_equal, hopper
+from .helper import OverstatedLengthSequence, assert_image_equal, hopper
 
 
 @pytest.mark.parametrize(
@@ -170,6 +170,14 @@ def test_builtinfilter_p() -> None:
 def test_kernel_not_enough_coefficients() -> None:
     with pytest.raises(ValueError):
         ImageFilter.Kernel((3, 3), (0, 0))
+
+
+def test_kernel_uses_materialized_sequence_length() -> None:
+    coefficients = OverstatedLengthSequence((1.0, 2.0), 9)
+    kernel = ImageFilter.Kernel((3, 3), coefficients, scale=1)  # type: ignore[arg-type]
+
+    with pytest.raises(ValueError, match="bad kernel size"):
+        Image.new("L", (8, 8)).filter(kernel)
 
 
 @pytest.mark.parametrize(

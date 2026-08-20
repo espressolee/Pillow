@@ -6,7 +6,12 @@ import pytest
 
 from PIL import Image, ImageTransform
 
-from .helper import assert_image_equal, assert_image_similar, hopper
+from .helper import (
+    OverstatedLengthSequence,
+    assert_image_equal,
+    assert_image_similar,
+    hopper,
+)
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
@@ -34,6 +39,14 @@ class TestImageTransform:
             ),
         ):
             assert_image_equal(im, im.transform(im.size, transform))
+
+    def test_uses_materialized_sequence_length(self) -> None:
+        data = OverstatedLengthSequence((1.0, 0.0), 6, preserve_slices=True)
+
+        with pytest.raises(ValueError, match="wrong number of matrix entries"):
+            Image.new("L", (4, 4)).transform(
+                (4, 4), Image.Transform.AFFINE, data  # type: ignore[arg-type]
+            )
 
     def test_info(self) -> None:
         comment = b"File written by Adobe Photoshop\xa8 4.0"

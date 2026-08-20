@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from .helper import assert_image_equal, hopper
+from .helper import OverstatedLengthSequence, assert_image_equal, hopper
 
 
 def test_sanity() -> None:
@@ -56,6 +56,14 @@ def test_f_lut() -> None:
 
     int_lut = [x // 2 for x in range(256)]
     assert_image_equal(out.convert("L"), im.point(int_lut, "L"))
+
+
+def test_lut_uses_materialized_sequence_length() -> None:
+    im = hopper("L")
+    lut = OverstatedLengthSequence(tuple(float(i) for i in range(8)), 256)
+
+    with pytest.raises(ValueError, match="wrong number of lut entries"):
+        im.point(lut, "F")  # type: ignore[arg-type]
 
 
 def test_f_mode() -> None:

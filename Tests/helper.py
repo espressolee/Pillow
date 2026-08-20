@@ -33,6 +33,31 @@ elif "GITHUB_ACTIONS" in os.environ:
     uploader = "github_actions"
 
 
+class OverstatedLengthSequence:
+    """A sequence whose declared length exceeds what iteration materializes."""
+
+    def __init__(
+        self,
+        values: tuple[float, ...],
+        claimed_length: int,
+        *,
+        preserve_slices: bool = False,
+    ) -> None:
+        self.values = values
+        self.claimed_length = claimed_length
+        self.preserve_slices = preserve_slices
+
+    def __len__(self) -> int:
+        return self.claimed_length
+
+    def __getitem__(
+        self, index: int | slice
+    ) -> float | tuple[float, ...] | OverstatedLengthSequence:
+        if isinstance(index, slice) and self.preserve_slices:
+            return self
+        return self.values[index]
+
+
 def upload(a: Image.Image, b: Image.Image) -> str | None:
     if uploader == "show":
         # local img.show for errors.

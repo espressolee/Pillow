@@ -8,7 +8,7 @@ import pytest
 
 from PIL import Image
 
-from .helper import assert_image_equal, hopper
+from .helper import OverstatedLengthSequence, assert_image_equal, hopper
 
 
 def test_sanity() -> None:
@@ -112,3 +112,12 @@ def test_not_flattened() -> None:
     with pytest.raises(TypeError):
         im = Image.new("F", (1, 1))
         im.putdata([[0]])
+
+
+def test_uses_materialized_sequence_length() -> None:
+    im = Image.new("L", (4, 4))
+    data = OverstatedLengthSequence((1.0, 2.0), 16)
+
+    im.putdata(data)  # type: ignore[arg-type]
+
+    assert im.get_flattened_data() == (1, 2) + (0,) * 14

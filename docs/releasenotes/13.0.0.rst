@@ -93,6 +93,15 @@ TODO
 Other changes
 =============
 
+Sequence lengths are checked after materialization
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+``Image.point()``, ``Image.putdata()``, ``Image.transform()`` and
+``ImageFilter.Kernel`` now use the length of the sequence that Pillow actually
+materialized. Previously, a custom sequence whose ``__len__`` overstated the
+number of values produced by iteration could make the C extension read past the
+end of that materialized sequence.
+
 Python 3.15
 ^^^^^^^^^^^
 
